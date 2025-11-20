@@ -1,4 +1,3 @@
-#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 (personal access token)
 library(readr)#loading package
 library(tidyverse)#loading package
 setwd("Data")#set working directory within files on my computer
