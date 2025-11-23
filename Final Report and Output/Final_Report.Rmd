@@ -1,0 +1,375 @@
+---
+title: "Final_Report"
+output:
+  html_document: default
+  pdf_document: default
+date: "2025-11-23"
+editor_options:
+  markdown:
+    wrap: 72
+---
+
+# Introduction
+
+The National Health Interview Survey (NHIS) is a large, nationally
+representative survey of the U.S. population. In this project, we
+examine how demographic characteristics, body measurements, general
+health, and life satisfaction relate to one another. Our analysis uses
+the 2021 NHIS Sample Adult File and focuses on age (AGEP_A), sex
+(SEX_A), education (EDUCP_A), height (HEIGHTTC_A), weight
+(WEIGHTLBTC_A), general health (PHSTAT_A), and life satisfaction
+(LSATIS4R_A).
+
+# Methods
+
+We used the cleaned dataset created earlier in our project and saved as
+`nhis_clean.csv`. After importing the dataset, we converted several
+variables to factors with meaningful labels and produced descriptive
+statistics, univariate plots, bivariate comparisons, and multivariate
+visualizations. Height–weight trends and correlations among age, height,
+and weight were examined using both ggplot2 and psych’s `pairs.panels()`
+function.
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Day 1
+
+```{r}
+library(readr)#loading package
+library(tidyverse)#loading package
+setwd("/Users/lesleythompson/Desktop/Pubh 422/NHIS2021_Group3/Data")#set working directory within files on my computer
+NHIS_2021 <- read.csv("NHIS _Data_2021.csv", header = TRUE) #load hints dataset
+View(NHIS_2021)#look at whole data set
+str(NHIS_2021)#gives data structure
+head(NHIS_2021)#print first 6 rows of data
+summary(NHIS_2021)# gives summary of data
+```
+
+# Day 2
+
+```{r}
+attach(NHIS_2021)
+subNHIS <- NHIS_2021 %>% 
+  select(AGEP_A, WEIGHTLBTC_A, HEIGHTTC_A, SEX_A, HISPALLP_A, EDUCP_A, PHSTAT_A, LSATIS4R_A)
+#allows us to select only the variables required for analysis, helps prevent the removal of more participants than necessary
+View(subNHIS)#making sure only the selected variables show up
+sum(is.na(subNHIS))
+#missing values in the code book are 97-99,7, 9, and 996-999 depending on the variable, excluded below by only including values outside of missing
+NHIS_omit <- subNHIS[c(AGEP_A <97 & WEIGHTLBTC_A <996 & HEIGHTTC_A <96 & SEX_A <3 & HISPALLP_A <8 & EDUCP_A <11 & PHSTAT_A <6 & LSATIS4R_A <5),]
+#Checking to make sure missing values have been ommitted
+summary(NHIS_omit)
+#seeing how much data was removed from the dataset
+str(NHIS_omit)
+#creating new levels from 1-4 based on the codebook by excluding all values not in that section
+NHIS_omit$EDUCP_A[NHIS_omit$EDUCP_A >=0 & NHIS_omit$EDUCP_A <=3] = 1
+NHIS_omit$EDUCP_A[NHIS_omit$EDUCP_A == 4] = 2
+NHIS_omit$EDUCP_A[NHIS_omit$EDUCP_A >=5 & NHIS_omit$EDUCP_A <=7] = 3
+NHIS_omit$EDUCP_A[NHIS_omit$EDUCP_A >=8 & NHIS_omit$EDUCP_A <=10] = 4
+#making sure the new levels are working
+summary(NHIS_omit$EDUCP_A)
+#adding the labels to the new levels for education using the NHIS 2021 codebook
+NHIS_2021_clean <- NHIS_omit %>%
+  mutate(EDUCP_A = factor(EDUCP_A,
+                          levels = c(1,2,3,4),
+                          labels = c("less than High School","High School Graduate", "Some College Education","College Graduate or better")))
+#Making sure data labels are showing up properly
+summary(NHIS_2021_clean$EDUCP_A)
+#making sure that education is now a factor variable with meaningful labels
+str(NHIS_2021_clean$EDUCP_A)
+View(NHIS_2021_clean)
+#creating the cleaned .csv file for submission, with the help function
+?write.csv
+write.csv(NHIS_2021_clean, "nhis_clean.csv")
+```
+
+# Day 3
+
+```{r}
+# Load required library for ggplot2
+library(ggplot2)
+
+# Check first few rows and column names
+head(NHIS_2021_clean)
+names(NHIS_2021_clean)
+
+######DAY 3
+#### Task 1
+###Summary Statistics 
+
+#Quantitative Variables
+
+# 1. Age (AGEP_A)
+cat("=== AGE (AGEP_A) ===\n")
+summary(NHIS_2021_clean$AGEP_A)                     # Min, 1st Qu., Median, Mean, 3rd Qu., Max
+cat("Mean:", mean(NHIS_2021_clean$AGEP_A, na.rm=TRUE), "\n")
+cat("Median:", median(NHIS_2021_clean$AGEP_A, na.rm=TRUE), "\n")
+cat("Standard Deviation:", sd(NHIS_2021_clean$AGEP_A, na.rm=TRUE), "\n\n")
+
+# 2. Weight (WEIGHTLBTC_A)
+cat("=== WEIGHT (WEIGHTLBTC_A) ===\n")
+summary(NHIS_2021_clean$WEIGHTLBTC_A)
+cat("Mean:", mean(NHIS_2021_clean$WEIGHTLBTC_A, na.rm=TRUE), "\n")
+cat("Median:", median(NHIS_2021_clean$WEIGHTLBTC_A, na.rm=TRUE), "\n")
+cat("Standard Deviation:", sd(NHIS_2021_clean$WEIGHTLBTC_A, na.rm=TRUE), "\n\n")
+
+# 3. Height (HEIGHTTC_A)
+cat("=== HEIGHT (HEIGHTTC_A) ===\n")
+summary(NHIS_2021_clean$HEIGHTTC_A)
+cat("Mean:", mean(NHIS_2021_clean$HEIGHTTC_A, na.rm=TRUE), "\n")
+cat("Median:", median(NHIS_2021_clean$HEIGHTTC_A, na.rm=TRUE), "\n")
+cat("Standard Deviation:", sd(NHIS_2021_clean$HEIGHTTC_A, na.rm=TRUE), "\n")
+
+
+
+
+```
+
+**Interpretation:**
+
+The NHIS_2021_clean data set had a mean age of 52.57 (SD = 18.33), the
+minimum age was 18, and the maximum age was 85 The mean weight was 176.8
+(SD = 39.59), with a minimum of 100, and a maximum of 299. The mean
+height was 66.7 inches (3.89) with a minimum of 59, and a maximum of 79.
+Looking at these descriptive statistics give a preliminary understanding
+of who this data is representing, and is important when drawing
+conclusions for future statistical analyses.
+
+```{r}
+### Base R Histograms
+hist(NHIS_2021_clean$AGEP_A, main="Age Histogram", xlab="Age")
+hist(NHIS_2021_clean$WEIGHTLBTC_A, main="Weight Histogram", xlab="Weight (lbs)")
+hist(NHIS_2021_clean$HEIGHTTC_A, main="Height Histogram", xlab="Height (inches)")
+
+
+### ggplot2 Histograms 
+ggplot(NHIS_2021_clean, aes(x=AGEP_A)) + geom_histogram(binwidth=5, fill="skyblue", color="black") + labs(title="Age Histogram", x="Age")
+ggplot(NHIS_2021_clean, aes(x=WEIGHTLBTC_A)) + geom_histogram(fill="skyblue", color="black") + labs(title="Weight Histogram")
+ggplot(NHIS_2021_clean, aes(x=HEIGHTTC_A)) + geom_histogram(fill="skyblue", color="black") + labs(title="Height Histogram")
+```
+
+**Interpretation:**\
+The sample contains adults across a wide age range that seems normally
+distributed, with a concentration in middle-aged groups.
+
+```{r}
+#Boxplots Base R 
+boxplot(NHIS_2021_clean$AGEP_A, main="Age Boxplot")
+boxplot(NHIS_2021_clean$WEIGHTLBTC_A, main="Weight Boxplot")
+boxplot(NHIS_2021_clean$HEIGHTTC_A, main="Height Boxplot")
+
+
+#Boxplot ggplot2
+ggplot(NHIS_2021_clean, aes(y=AGEP_A)) + geom_boxplot(fill="purple") + labs(title="Age Boxplot")
+ggplot(NHIS_2021_clean, aes(y=WEIGHTLBTC_A)) + geom_boxplot(fill="purple") + labs(title="Weight Boxplot")
+ggplot(NHIS_2021_clean, aes(y=HEIGHTTC_A)) + geom_boxplot(fill="purple") + labs(title="Height Boxplot")
+```
+
+**Interpretation:**\
+When looking at the height variable, M=most participants fall between 65
+and 70 inches.
+
+###Qualitative Variables
+
+##Frequency Table
+
+```{r}
+table(NHIS_2021_clean$SEX_A)
+table(NHIS_2021_clean$HISPALLP_A)
+table(NHIS_2021_clean$EDUCP_A)
+table(NHIS_2021_clean$PHSTAT_A)
+table(NHIS_2021_clean$LSATIS4R_A)
+```
+
+**Interpretation:**\
+Many respondents have at least a high school diploma, with most
+reporting some college or a college degree at 10,358 participants. There
+were more females than males within the data, most participants were non
+hispanic white, had very good health status, and were very satisfied or
+satisfied with their lives. From a public health standpoint, results
+indicate that this dataset has higher numbers of participants that could
+be considered mentally and physically content, and further research
+could be done to see if any to variables with what could be considered
+positive results are related to one another.
+
+```{r}
+## Base R Bar plots for qualitative variables 
+barplot(table(NHIS_2021_clean$SEX_A), main="Sex", xlab="Category")
+barplot(table(NHIS_2021_clean$HISPALLP_A), main="Race/Ethnicity", xlab="Category")
+barplot(table(NHIS_2021_clean$EDUCP_A), main="Education", xlab="Category")
+barplot(table(NHIS_2021_clean$PHSTAT_A), main="Health Status", xlab="Category")
+barplot(table(NHIS_2021_clean$LSATIS4R_A), main="Life Satisfaction", xlab="Category")
+
+
+##ggplot2 bar plots 
+ggplot(NHIS_2021_clean, aes(x=SEX_A)) + geom_bar(fill="maroon") + labs(title="Sex")
+ggplot(NHIS_2021_clean, aes(x=HISPALLP_A)) + geom_bar(fill="maroon") + labs(title="Race/Ethnicity")
+ggplot(NHIS_2021_clean, aes(x=EDUCP_A)) + geom_bar(fill="maroon") + labs(title="Education")
+ggplot(NHIS_2021_clean, aes(x=PHSTAT_A)) + geom_bar(fill="maroon") + labs(title="Health Status")
+ggplot(NHIS_2021_clean, aes(x=LSATIS4R_A)) + geom_bar(fill="maroon") + labs(title="Life Satisfaction")
+```
+
+**Interpretation:**\
+Most respondents have at least a high school diploma, with many
+reporting some college or a college degree.
+
+#Day 3 Task 2: Bivariate Analysis
+
+\## 1. Quantitative vs Qualitative
+
+```{r}
+# Load libraries
+library(ggplot2)
+
+## 1A: AGE by SEX_A - Base R
+boxplot(AGEP_A ~ SEX_A, data=NHIS_2021_clean,
+        main="Age by Sex",
+        xlab="Sex (1=Male, 2=Female)",
+        ylab="Age",
+        col=c("lightblue","lightgreen"))
+
+# 1B: AGE by SEX_A ggplot2
+ggplot(NHIS_2021_clean, aes(x=factor(SEX_A), y=AGEP_A, fill=factor(SEX_A))) +
+  geom_boxplot() +
+  labs(title="Age by Sex", x="Sex (1=Male, 2=Female)", y="Age") +
+  scale_fill_manual(values=c("lightblue","lightgreen")) +
+  theme_minimal()
+```
+
+**Interpretation:**\
+Within the sample, men and women have a similar distribution looking at
+age.
+
+```{r}
+# 1C Age by EDUCP_A Base R
+boxplot(AGEP_A ~ EDUCP_A, data=NHIS_2021_clean,
+        main="Age by Education",
+        xlab="Education Level",
+        ylab="Age",
+        col="lightgreen",
+        las=2)  
+
+# 1D Age by EDUCP_A ggplot2
+ggplot(NHIS_2021_clean, aes(x=factor(EDUCP_A), y=AGEP_A, fill=factor(EDUCP_A))) +
+  geom_boxplot() +
+  labs(title="Age by Education", x="Education Level", y="Age") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle=45, hjust=1))
+```
+
+**Interpretation:**\
+When looking at education, age seems to decrease with higher levels of
+education.
+
+## 2. Qualitative vs Qualitative
+
+```{r}
+# Clustered bar chart ggplot2
+ggplot(NHIS_2021_clean, aes(x=factor(PHSTAT_A), fill=factor(LSATIS4R_A))) +
+  geom_bar(position="dodge") +
+  labs(title="Life Satisfaction by General Health",
+       x="General Health Status",
+       y="Count",
+       fill="Life Satisfaction") +
+  theme_minimal()
+```
+
+**Interpretation:**\
+Respondents with better general health tend to report higher life
+satisfaction.
+
+## 3. Quantitative vs Quantitative
+
+```{r}
+# 3A: Height vs weight Base R version 
+plot(NHIS_2021_clean$HEIGHTTC_A, NHIS_2021_clean$WEIGHTLBTC_A,
+     main="Height vs Weight",
+     xlab="Height (inches)",
+     ylab="Weight (lbs)",
+     col="orchid", pch=16)
+
+# 3B Height vs weight ggplot2
+ggplot(NHIS_2021_clean, aes(x=HEIGHTTC_A, y=WEIGHTLBTC_A)) +
+  geom_point(color="blue") +
+  labs(title="Height vs Weight", x="Height (inches)", y="Weight (lbs)") +
+  theme_minimal()
+```
+
+**Interpretation:**\
+This graph shows that low height is related to lower weight, while
+larger height is related to higher weight.
+
+```{r}
+# 3C Correlation coefficient
+cor_value <- cor(NHIS_2021_clean$HEIGHTTC_A, NHIS_2021_clean$WEIGHTLBTC_A, use="complete.obs")
+cat("Correlation coefficient (Height vs Weight):", cor_value, "\n")
+```
+
+**Interpretation:**\
+Height and weight show a strong positive correlation, consistent with
+expected body-size patterns.
+
+## Multivariate Visualization
+
+```{r}
+# Load packages
+library(ggplot2)
+library(psych)
+
+##### Task 1: Part 1 Enhancing Scatter Plot (Height vs Weight)
+# Colored by SEX_A and faceted by EDUCP_A
+ggplot(NHIS_2021_clean, aes(x = HEIGHTTC_A, y = WEIGHTLBTC_A, color = factor(SEX_A))) +
+  geom_point(alpha = 0.7) +
+  facet_wrap(~ EDUCP_A) +   
+  labs(
+    title = "Height vs Weight by Sex and Education Level",
+    x = "Height (inches)",
+    y = "Weight (lbs)",
+    color = "Sex"
+  ) +
+  theme_minimal()
+```
+
+**Interpretation:**\
+The height–weight trend is consistent across sexes and education groups,
+though men tend to weigh more at comparable heights.
+
+## Part 2 Correlation Plot Matrix
+
+```{r}
+# Variables: Age, Weight, Height
+
+vars_for_corr <- NHIS_2021_clean[, c("AGEP_A", "WEIGHTLBTC_A", "HEIGHTTC_A")]
+
+# Psych package scatter matrix
+pairs.panels(
+  vars_for_corr,
+  method = "pearson",      # method used 
+  hist.col = "lightblue",  # color of histograms
+  density = TRUE,         
+  ellipses = TRUE          
+)
+```
+
+**Interpretation:**\
+Height and weight have the strongest correlation; age has weaker
+associations but contributes to variation in weight.
+
+# Discussion
+
+Our analysis of the 2021 NHIS dataset reveals several clear patterns.
+Self-rated health is strongly associated with life satisfaction, and the
+expected positive relationship between height and weight appears in all
+subgroups. Education shows meaningful differences in age distribution
+and may relate to health patterns indirectly. Because NHIS is
+cross-sectional, causal direction cannot be determined.
+
+# Conclusion
+
+Overall, the results suggest that demographic factors, education, health
+status, and well-being are interconnected. Better general health aligns
+with higher life satisfaction, height and weight show predictable
+correlations, and education does not drastically change body-size
+relationships. These findings highlight the value of descriptive and
+multivariate approaches when analyzing public health survey data.
