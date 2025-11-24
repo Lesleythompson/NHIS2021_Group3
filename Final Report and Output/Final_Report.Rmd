@@ -1,0 +1,227 @@
+---
+title: "Pubh 422 Test 2"
+author: "Lesley Thompson"
+output: html_document
+date: "2025-11-04"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# **Day1**
+
+### Environmental Setup & Data Import
+
+```{r Day 1, echo=TRUE}
+library(readr)#loading package
+library(tidyverse)#loading package
+setwd("/Users/lesleythompson/Desktop/Pubh 422")#set working directory within files on my computer
+hints <- read.csv("hints7_public data_2024.csv", header = TRUE) #load hints dataset
+View(hints)#look at whole data set
+dim(hints)#gives dimensions for the data
+head(hints)#print first 6 rows of data
+summary(hints)# gives summary of data
+
+```
+
+### Data Cleaning & Value Labeling
+
+```{r}
+str(hints)#displays the data structure
+attach(hints)#attach data to make it easier to reference while coding
+is.na(hints) #looking for missing values
+hints_clean <- hints[c(BirthSex>0 & BirthSex<3 & MaritalStatus>0 & EducA>0 & HHInc>0 & smokeStat>0 & RaceEthn5>0 & ECigUse>0 &
+                   phq4>=0 & Exercise>=0 &  AvgDrinksPerWeek>=0 & Age>=0 & TotalHousehold>=0 & BMI>=0),]#remove negative values by selecting values over 0, and removing birth sex outputs of 3, as they are not in the codebook or on hints website
+
+attach(hints_clean)#attaching cleaned version of the data
+
+hints_clean <- hints_clean %>% #applying the factoring into the variable
+mutate(BirthSex = factor(BirthSex, #making the variable a factor with levels
+levels = c(1,2), #creating label levels that coincide with the labels
+labels = c("Male", "Female")))#making labels based on the hints codebook
+
+hints_clean <- hints_clean %>% #applying the factoring into the variable
+mutate(MaritalStatus = factor(MaritalStatus,#making the variable a factor with levels
+levels = c(1,2,3,4,5,6),#creating label levels to coincide with the labels
+labels = c("Married", "living as married", "Divorced", "Widowed", "Separated", "Single")))
+
+hints_clean <- hints_clean %>%#applying the factoring into the variable
+mutate(EducA = factor(EducA,#making the variable a factor with levels
+levels = c(1,2,3,4),#creating label levels to coincide with the labels
+labels = c("Less than High School", "High School", "Some College", "College Graduate or More")))
+
+hints_clean <- hints_clean %>%#applying the factoring into the variable
+mutate(HHInc = factor(HHInc,#making the variable a factor with levels
+levels = c(1,2,3,4,5,6),#creating label levels to coincide with the labels
+labels = c("<$20,000", "$20,000-<$35,000", "$35,000-<$50,000", "$50,000-<$75,000", "$75,000-<100,000", ">orequalto$100,000")))
+
+hints_clean <- hints_clean %>% #applying the factoring into the variable
+mutate(smokeStat = factor(smokeStat,#making the variable a factor with levels
+levels = c(1,2,3),#creating label levels to coincide with the labels
+labels = c("Current", "Former", "Never")))
+
+hints_clean <- hints_clean %>% #applying the factoring into the variable
+mutate(RaceEthn5 = factor(RaceEthn5,#making factor variable
+levels = c(1,2,3,4,5),#creating label levels to coincide with the labels
+labels = c("Non-Hispanic White", "Non-Hispanic Black or African American", "Hispanic", "Non-Hispanic Asian", "Non-Hispanic Other")))
+
+hints_clean <- hints_clean %>% 
+mutate(ECigUse = factor(ECigUse,#making the variable a factor with levels
+levels = c(1,2,3),#creating label levels to coincide with the labels
+labels = c("Current", "Former", "Never")))#creating labels
+summary(hints_clean$MaritalStatus)#checking a variable to make sure the labels came out
+```
+
+# Day 2
+
+### Summary Statistics for Quantitative Variables
+
+```{r Day 2}
+#Day 2
+library(summarytools)
+#descr() gives descriptive statistics for numeric variables
+descr(Age)
+descr(TotalHousehold)
+descr(BMI)
+descr(phq4)
+descr(Exercise)
+descr(AvgDrinksPerWeek)
+```
+
+The hints_clean data set had a total of 5,530 participants. Of these participants, the mean age was 54.19 (SD = 17.76), the minimum age was 18, and the maximum age was 100. The mean total people in any one household was 2.41 (SD = 1.38), with a minimum of 1, and a maximum of 11. Regarding BMI the median was 28.87 (SD = 6.96), with a minimum BMI of 10.20, and a maximum of 66.60. The mean PHQ-4 total score was 2.22 (SD = 2.98), the minimum score was 0, and the maximum score was 12. Looking at weekly minutes of moderate exercise, the mean was 181.33 (SD = 310.31), the minimum was 0 minutes, and the maximum was 5040 minutes. the final quantitative variable for our analysis was participant average drinks per week, where the mean score was 2.88 (SD = 6.56), the minimum was 0 drinks, and the maximum was 75 drinks. Looking at these descriptive statistics give a better understanding of what the data set consists of, and what may be important to look further into for in depth analysis. This could include understanding how the variables relate to each other to create a story with the data. This is important for public health because it helps make sure resources are used to address the most pressing issues within the target population. An example of this could be seeing certain scores on the PHQ-4 total score. If previous research has seen certain results that are not aligning with this current dataset, it may indicate that scores need to be looked between different groups, like by age, to see if the relationship differs.
+
+### Frequency Tables for Qualitative Variables
+
+```{r}
+#freq() gives the frequency of each value in a variable as percents
+freq(BirthSex)
+freq(MaritalStatus)
+freq(EducA)
+freq(HHInc)
+freq(smokeStat)
+freq(RaceEthn5)
+freq(ECigUse)
+```
+
+The qualitative variables in the hints data set show that the sample was mostly male at 3,269 participants (59.11%). Additionally, it was seen that 2,595 (46.93%) participants were married, followed by single individuals at 1,235 (22.15%). Most participants, specifically 2,820 (50.99%), were a college graduate or more, followed by some college at 1,585 (28.66%) individuals, and the smallest group for education level was less than high school with 298 (5.39%) respondents. The largest bracket for annual household income was equal to or over $100,000 with 1,745 participants (31.56%). Considering smoking status, most participants had never smoked at 3,579 individuals (64.72%). Non-Hispanic White participants made up the largest race and ethnicity group with 3,127 (56.55%) participants. Finally, for E-cigarette use, the largest response group sat at 4,654 (84.16%) participants having reported never using an e-cigarette. Again we see data that describes the general details of the sample population. This is important because it allows researchers to see who they are studying, and therefore to whom they should be applying any results to at a larger scale. An example of this can be seen in the e-cigarette use variable. Since it is known that 84.16% of respondents have never used an e-cigarette, developing an intervention for e-cigarette prevention may not be the most important action for public health officials when compared to promoting cessation, because most people are unlikely to start using e-cigarettes.
+
+# Day 3 
+
+### Visualizing Quantitative Variables
+
+```{r Histogram & Density Plot}
+ggplot(hints_clean, aes(x = BMI, color = BirthSex, fill = BirthSex)) +#ggplot base, with fill for sex
+  geom_histogram(aes(y = ..density..),#ggplot formula for histogram with density plot
+                 alpha = 0.25, # transparency so group overlap is shown
+                 position = "identity",# overlap instead of side-by-side
+                 bins = 30,  # number of bins
+                 color = "black") + #color of outline
+  geom_density(alpha = 0.2) + # gives a smoother density overlay
+  labs(title = "Histogram of BMI and Density Overlay of Sex",#labs for titles
+       x = "Body Mass Index (BMI)",
+       y = "Density") +
+  theme_bw()#theme gives grids
+```
+
+Looking at the shape of the distribution between males and females, it appears that males seem to have a higher average BMI than females, and both histograms appear to be normally distributed. These results indicate that because males have a higher average BMI, they may require different health approaches than women who have lower BMI on average. An example of this can be seen in other variables in this data set like alcohol, as we can hypothesize that males may be able to drink more per week because they require more to become drunk due to a higher BMI, not solely due to a desire to drink more.
+
+```{r Box Plot}
+#boxplot
+ggplot(hints_clean, aes(x = smokeStat, y = phq4))+#code for base ggplot, selecting x and y axis variables
+  geom_boxplot(fill = "green")+#fill the boxes with green
+  labs(title = "Box Plot of PHQ-4 Scores by Smoking Status", #labs gives labels for the plot
+       x = "Smoking Status",
+       y = "PHQ-4 Scores")+
+  theme_bw() #theme classical is a visual function from ggplot, with bw giving grid line
+```
+
+This box plot indicates that current smokers displayed higher average PHQ-4 scores than former smokers or those who have never smoked. These results indicate that those who currently smoke may be more vulnerable to feeling anxiety or depression, indicating a need for intervention programs not only targeting ending unhealthy habits like smoking, but also in maintaining mental and physical well being in the current smokers.
+
+```{r Scatterplot}
+#scatterplot
+ggplot(hints_clean, aes(x = Age, y = AvgDrinksPerWeek))+
+  geom_point() +#code for the scaterplot
+  geom_smooth(method = "lm", se = TRUE, color = "hotpink")+#gives the trend line
+  labs(title  = "Scatterplot of Age by Average Drinks Per Week", #labs are titles for plot
+       x = "Age",
+       y = "Drinks Per Week")+
+  theme_bw()#theme classical is a visual function from ggplot, with bw giving grids
+```
+
+This scatterplot shows that there does not seem to be a trend in different ages and number of drinks per week, as the trend line is straight. This shows that in this sample, no one age has an association with higher amounts of drinking than another, and there may not be a need for an age specific intervention targeted at substance use when it comes to drinking.
+
+### Visualizing Qualitative Data
+
+```{r Bar Plot (Counts)}
+#Bar plot
+ggplot(hints_clean, aes(x = RaceEthn5))+#ggplot2 formula
+  geom_bar(fill = "lightpink", color = "black")+#code for creating the bar
+  labs(title = "Bar Plot for Race and Ethnicity",#labs for titles
+       x = "Race and Ethnicity",
+       y = "Frequency")+
+  theme_bw()+ #theme_bw gives grid line to plot
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))#gives tilt of x axis labels
+```
+
+This bar plot for race and ethnicity shows that the participants were mainly Non-Hispanic White. From a public health standpoint, these results indicate that, depending on the researchers literature review, they may not be as applicable to other groups outside of Non-Hispanic White, as there are varying cultural factors that can affect an individual's likelihood for certain health outcomes and behaviours. However, if this bar chart reflects the actual population demographics in the US shown in the literature, then this bar chart would instead indicate that results would be representative and applicable to the larger population.
+
+```{r Bar Plot (Proportions)}
+
+#Bar Plot
+ggplot(hints_clean, aes(x = EducA, fill = MaritalStatus)) +#bar chart formula in ggplot2
+  geom_bar(position = "dodge") +   # dodge makes side by side, or clustered bars
+  labs(title = "Bar Graph of Marital Status V.S. Educational Attainment", #labs allows for all titles/labels to be inserted
+       x = "Education Level",
+       y = "Frequency",
+       fill = "Marital Status") +#filling bars by marital status
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))#theme of the graph, and test elements such as the angle of the x axis labels, or they would not fit
+```
+
+This clustered bar chart shows that most individuals in this sample were both married and college graduates or more. Considering public health, both education and marriage are considered modifiers of risk, as both have been linked to decreased likelihood of certain disease outcomes. By understanding that this sample has a greater number of married individuals who are college graduates or more, it can be better understood that they may be more likely to show better physical and mental health outcomes.
+
+```{r Faceted Plot}
+#faceted plot
+ggplot(hints_clean, aes(x = Exercise))+#function for ggplot2
+  geom_histogram()+#used to create histograms
+  facet_wrap(~ECigUse, ncol = 1)+#gives a faceted plot with E-cigarette use
+  labs(title = "Exercise per Week by E-Cigarette Use ",#labs for all titles
+       x = "Exercise Minutes Per Week",
+       y = "Frequency")
+```
+
+This faceted plot shows that those who have never smoked e-cigarettes are associated with more exercise minutes per week. In public health, these results indicate that those who engage in healthy habits do so in multiple areas of their life, such as avoiding smoking and exercising regularly. This also implies that interventions should focus on current and former smokers to encourage healthy behaviors, like exercise and quitting smoking e-cigarettes.
+
+# Day 4
+
+### Cross Tabulation
+
+```{r}
+ctable(x = factor(BirthSex), y = factor(HHInc)) #gives cross-tabulations with row percents
+ctable(x = factor(BirthSex), y = factor(HHInc),
+prop = T) #get proporton from table total
+ctable(x = factor(BirthSex), y = factor(HHInc),
+       chisq = TRUE) # Chi-square test of independence
+```
+
+The chi-squared test indicates that there is a significant difference between males and females when looking at annual household income, X²(5, N = 5,530) = 71.33, p < .001. These results indicate that within the largest reported income group of $100,000 or more per year, 36.7% of women were within the group compared to 28% of men. These results indicate that men may be in greater need of interventions related to income level when compared to women. Such results are important because they can help public health officials decide what communities need the most
+
+### Correlation Analysis
+
+```{r}
+library(psych)#Loading package
+pairs.panels(hints_clean[,c(2,9,12,13)],#creating correlation matrix selecting only these columns
+             main = "Scatterplot Matrix")#title for plot
+#correlation from heatmap
+library(corrplot)#load corrplot package
+CorTask8 <- cor(hints_clean[,c(2,9,12,13)]) #get correlations for the heatmap with these specific columns
+corrplot(CorTask8, method = 'number') #correlation matrix including colorful numbers, making heat map
+```
+
+The strongest positive relationship I see is 0.08, which is not a strong correlation at all. All relationships with 1 indicate that any 2 variables with this value are positively related, however the only vales of 1 shown are between one variable and itself. The strongest negative correlation that I see is between PHQ-4 scores and Age (r = -0.24). These results indicate that increased age is slightly correlated with decreased PHQ-4 scores, indicating that further research should be done to see if younger individuals may be in greater need of mental health interventions.
+
+# Day 5
+
+### Synthesis & Report Final Findings 
+
+The HINTS 2024 dataset is a representative U.S. survey of adults aged 18+ examining trends in health knowledge and behaviors. The sample was 59.11% male, with a mean age of 54.19. Most participants were married and held a college degree or higher. A small negative correlation was found between age and PHQ-4 scores (r = –0.24), suggesting older adults correlate with fewer anxiety and depression symptoms. A Chi-square test revealed a significant association between sex and household income, indicating  women (36.7%) were more likely to report higher incomes than men (28%), X²(10, N=5,530) = 71.33, p \< .001. These findings may suggest targeted interventions for younger adults with higher PHQ-4 scores and for men with lower income levels. One limitation of this analysis is the substantial number of missing values (n = 1,748), which reduced the sample size and could limit result significance.
