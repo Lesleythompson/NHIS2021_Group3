@@ -1,6 +1,3 @@
-# Load required library for ggplot2
-library(ggplot2)
-
 # Check first few rows and column names
 head(clean)
 names(clean)
