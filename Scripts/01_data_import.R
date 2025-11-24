@@ -1,5 +1,8 @@
+#loading packages
 library(readr)#loading package
 library(tidyverse)#loading package
+library(ggplot2)
+library(psych)
 # Load required library for ggplot2
 library(ggplot2)
 setwd("Data")#set working directory within files on my computer
