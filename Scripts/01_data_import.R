@@ -1,5 +1,7 @@
 library(readr)#loading package
 library(tidyverse)#loading package
+# Load required library for ggplot2
+library(ggplot2)
 setwd("Data")#set working directory within files on my computer
 NHIS_2021 <- read.csv("NHIS _Data_2021.csv", header = TRUE) #load hints dataset
 View(NHIS_2021)#look at whole data set
